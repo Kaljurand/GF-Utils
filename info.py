@@ -34,7 +34,7 @@ def process_grammars(server_url, server_dir, grammars):
 	"""
 	"""
 	for g in grammars:
-		print '{:}{:}'.format(server_dir, g)
+		print '{:}/{:}'.format(server_dir, g)
 		req = urllib2.Request(server_url + server_dir + "/" + g)
 		try:
 			res = urllib2.urlopen(req)

@@ -1,12 +1,16 @@
 #! /usr/bin/env python
 
 # Uploads GF grammar modules to the GF cloud.
+# Note that there can be multiple source directories, however,
+# all the files are copied to a single directory
+# on the server so make sure that no filenames clash.
+
 # Author: Kaarel Kaljurand
 # Version: 2012-10-25
 #
 # Examples:
 #
-# python upload-grammar.py --dir /tmp/gfse.123 g1 g2
+# python upload-grammar.py --dir /tmp/dir g1 g2
 #
 import sys
 import argparse
@@ -15,8 +19,11 @@ import subprocess
 import re
 
 curl='curl'
-# We want to upload only gf and gfo files.
-ext_pattern='^\.(gf|gfo)$'
+# We want to upload only gf files.
+ext_pattern='^\.gf$'
+# In some cases precompiled gfo-files would also make sense,
+# i.e. TODO: make ext_pattern part of the commandline.
+#ext_pattern='^\.(gf|gfo)$'
 
 def gf_file_generator(src_dirs):
 	"""

@@ -18,6 +18,13 @@ import re
 curl='curl'
 EXT='.gf'
 
+def show_result(result):
+	if result["errorcode"] == "OK":
+		print "OK"
+	else:
+		print result["output"]
+
+
 # Commandline arguments parsing
 parser = argparse.ArgumentParser(description='Compiles a PGF on the GF cloud')
 
@@ -62,13 +69,14 @@ if args.verbosity > 1:
 
 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 out,err = p.communicate()
-result = json.loads(out)
-
-if args.verbosity > 1:
-	print json.dumps(result, indent=4)
-
-if args.verbosity > 0:
-	if result["errorcode"] == "OK":
-		print "OK"
-	else:
-		print result["output"]
+try:
+	result = json.loads(out)
+	if args.verbosity > 1:
+		print json.dumps(result, indent=4)
+	if args.verbosity > 0:
+		show_result(result)
+except:
+	print 'ERROR'
+	print 'stdout: {:}'.format(out)
+	print 'stderr: {:}'.format(err)
+	#print >> sys.stderr, sys.exc_info()[0]
