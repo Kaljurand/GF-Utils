@@ -34,6 +34,10 @@ parser.add_argument('-s', '--server', type=str, action='store', dest='server',
 parser.add_argument('-l', '--langs', type=str, action='store', dest='langs',
 	help='comma-separated list of 3-letter language codes, e.g. Eng,Ger,Spa (OBLIGATORY)')
 
+parser.add_argument('--verbosity', type=int, action='store', dest='verbosity',
+	default='1',
+	help='amount of output to produce')
+
 parser.add_argument('-v', '--version', action='version', version='%(prog)s v0.1')
 
 args = parser.parse_args()
@@ -48,12 +52,23 @@ if args.langs is None:
 
 name = args.name
 langs = args.langs.split(',')
-params = list( map( (lambda x: '-d' + name + x + EXT + '='), langs) )
-params.append('-d' + name + EXT + '=')
-cmd = [curl, '-d', "dir=" + args.dir, '-d', 'command=remake']
+params = [ '-d' + name + x + EXT + '=' for x in langs ]
+cmd = [curl, '-d', 'dir=' + args.dir, '-d', 'command=remake']
 cmd.extend(params)
 cmd.append(args.server + "/cloud")
-#print >> sys.stderr, ' '.join(cmd)
+
+if args.verbosity > 1:
+	print >> sys.stderr, ' '.join(cmd)
+
 p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 out,err = p.communicate()
-print json.dumps(json.loads(out), indent=4)
+result = json.loads(out)
+
+if args.verbosity > 1:
+	print json.dumps(result, indent=4)
+
+if args.verbosity > 0:
+	if result["errorcode"] == "OK":
+		print "OK"
+	else:
+		print result["output"]
