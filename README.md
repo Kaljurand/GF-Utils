@@ -44,6 +44,14 @@ Check for the currently available PGFs and their languages:
 
 	python info.py --dir /tmp/dir
 
+List the compiled modules (i.e. files with the extension '.gfo'):
+
+	python download.py --dir /tmp/dir --ext "gfo" --no-act
+
+Download the source files (i.e. files with the extension '.gf'):
+
+	python download.py --dir /tmp/dir --ext "gf" --out outdir
+
 Parsing:
 
 	echo "hello" | python pgf.py --dir /tmp/dir -g Phrasebook -f PhrasebookEng
