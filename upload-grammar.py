@@ -25,7 +25,7 @@ ext_pattern='^\.gf$'
 # i.e. TODO: make ext_pattern part of the commandline.
 #ext_pattern='^\.(gf|gfo)$'
 
-def gf_file_generator(src_dirs):
+def gf_file_generator(src_dirs, includes):
 	"""
 	Generates relative pathnames that correspond to
 	files with the extension $ext_pattern in the given directories.
@@ -36,7 +36,10 @@ def gf_file_generator(src_dirs):
 				path = os.path.join(root, name)
 				basename, extension = os.path.splitext(path)
 				if re.match(ext_pattern, extension):
-					yield [root, name]
+					if includes is None:
+						yield [root, name]
+					elif name in includes:
+						yield [root, name]
 
 
 def upload_files(dir, files):
@@ -65,6 +68,9 @@ parser = argparse.ArgumentParser(description='Uploads GF files to the GF cloud')
 parser.add_argument('src_dirs', metavar='SRC', type=str, nargs='+',
 	help='local directories to be copied to the server')
 
+parser.add_argument('--includes', type=str, action='store', dest='includes',
+	help='every uploaded file must be in this list (if specified) by its local name')
+
 parser.add_argument('-d', '--dir', type=str, action='store', dest='dir',
 	help='GF webservice directory (OBLIGATORY)')
 
@@ -81,5 +87,10 @@ if args.dir is None:
 	print >> sys.stderr, 'You can generate a new directory on the server by: curl ' + args.server + '/new'
 	exit()
 
-g = gf_file_generator(args.src_dirs)
+includes = None
+if args.includes is not None:
+	with open(args.includes) as f:
+		includes = f.read().splitlines()
+
+g = gf_file_generator(args.src_dirs, includes)
 upload_files(args.dir, g)

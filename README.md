@@ -9,7 +9,9 @@ Requirements
 
 Python.
 
-Some scripts require `curl`.
+Some scripts require `curl` on the PATH.
+
+Some scripts require `gf` on the PATH.
 
 Some scripts require a running GF Cloud Service (http://cloud.grammaticalframework.org/).
 To start it on localhost, execute (bash):
@@ -25,8 +27,12 @@ Documentation
 Look at the source code.
 
 
-Examples of interacting with the GF Cloud Service
--------------------------------------------------
+Examples
+--------
+
+Note: The following are `bash` command lines.
+
+### Interacting with the GF Cloud Service
 
 In each case you need to specify the directory on the server.
 The directory must exist and must have a name of the form "/grammars" or
@@ -55,3 +61,11 @@ Download the source files (i.e. files with the extension '.gf'):
 Parsing:
 
 	echo "hello" | python pgf.py --dir /tmp/dir -g Phrasebook -f PhrasebookEng
+
+
+# Other
+
+List the all the modules that are imported starting from 3 Phrasebook toplevel files,
+either directly or indirectly.
+
+	python reachable-modules.py ${GF_SRC}/examples/phrasebook/Phrasebook{Eng,Ger,Ita}.gf
