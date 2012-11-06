@@ -41,6 +41,9 @@ parser.add_argument('-s', '--server', type=str, action='store', dest='server',
 parser.add_argument('-l', '--langs', type=str, action='store', dest='langs',
 	help='comma-separated list of 3-letter language codes, e.g. Eng,Ger,Spa (OBLIGATORY)')
 
+parser.add_argument('-c', '--cat', type=str, action='store', dest='cat',
+	help='grammar start category')
+
 parser.add_argument('--verbosity', type=int, action='store', dest='verbosity',
 	default='1',
 	help='amount of output to produce')
@@ -62,6 +65,8 @@ langs = args.langs.split(',')
 params = [ '-d' + name + x + EXT + '=' for x in langs ]
 cmd = [curl, '-d', 'dir=' + args.dir, '-d', 'command=remake']
 cmd.extend(params)
+if args.cat is not None:
+	cmd.extend(['-d', '--startcat=' + args.cat, '-d', '--optimize-pgf='])
 cmd.append(args.server + "/cloud")
 
 if args.verbosity > 1:

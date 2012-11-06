@@ -18,7 +18,7 @@ To start it on localhost, execute (bash):
 
 	GF_RESTRICTED=yes gf -server
 
-(Required GF version 2012-10-23 or later.)
+(Required GF version 2012-11-06 or later.)
 
 
 Documentation
@@ -42,9 +42,10 @@ Upload the MOLTO Phrasebook:
 
 	python upload-grammar.py --dir /tmp/dir ${GF_SRC}/examples/phrasebook/
 
-Compile it for English and German:
+Compile it for English and German using `Phrase` as start category.
+The start category is optional, if specified then optimized compilation is used.
 
-	python make-pgf.py --dir /tmp/dir --langs Eng,Ger Phrasebook
+	python make-pgf.py --dir /tmp/dir --cat Phrase --langs Eng,Ger Phrasebook
 
 Check for the currently available PGFs and their languages:
 
