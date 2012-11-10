@@ -34,14 +34,14 @@ def process_grammars(server_url, server_dir, grammars):
 	"""
 	"""
 	for g in grammars:
-		print '{:}/{:}'.format(server_dir, g)
+		print '{0}/{1}'.format(server_dir, g)
 		req = urllib2.Request(server_url + server_dir + "/" + g)
 		try:
 			res = urllib2.urlopen(req)
 			jsonAsStr = res.read()
 			data = json.loads(jsonAsStr)
 			for l in get_languages(data):
-				print '\t{:}'.format(l)
+				print '\t{0}'.format(l)
 		except:
 			print >> sys.stderr, "ERROR: Failed to read grammar: " + g
 			print >> sys.stderr, sys.exc_info()[0]

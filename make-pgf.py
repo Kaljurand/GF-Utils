@@ -82,6 +82,6 @@ try:
 		show_result(result)
 except:
 	print 'ERROR'
-	print 'stdout: {:}'.format(out)
-	print 'stderr: {:}'.format(err)
+	print 'stdout: {0}'.format(out)
+	print 'stderr: {0}'.format(err)
 	#print >> sys.stderr, sys.exc_info()[0]

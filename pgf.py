@@ -44,9 +44,9 @@ def process_strings():
 			res = urllib2.urlopen(req)
 			jsonAsStr = res.read()
 			data = json.loads(jsonAsStr)
-			print '{:}{:}'.format(prefix, get_first_tree(data).encode('utf8'))
+			print '{0}{1}'.format(prefix, get_first_tree(data).encode('utf8'))
 		except:
-			print >> sys.stderr, 'ERROR {:}'.format(line)
+			print >> sys.stderr, 'ERROR {0}'.format(line)
 			print >> sys.stderr, sys.exc_info()[0]
 
 

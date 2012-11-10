@@ -92,12 +92,12 @@ query_dl = make_query({ 'dir' : args.dir, 'command' : 'download' })
 file_paths = get_file_paths(query_ls)
 
 if file_paths is None or len(file_paths) == 0:
-	print >> sys.stderr, '{:}'.format("No matching files")
+	print >> sys.stderr, '{0}'.format("No matching files")
 	exit()
 
 count = 0
 for f in get_file_paths(query_ls):
 	count = count + 1
-	print >> sys.stderr, '{:} {:}'.format(count, f)
+	print >> sys.stderr, '{0} {1}'.format(count, f)
 	if not args.noact:
 		download_and_save(f, args.out)

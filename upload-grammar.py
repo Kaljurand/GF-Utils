@@ -44,7 +44,7 @@ def gf_file_generator(src_dirs, includes):
 
 def upload_files(dir, files):
 	for [root, name] in files:
-		print '{:} {:}'.format(name, root)
+		print '{0} {1}'.format(name, root)
 		upload(dir, root, name)
 
 
