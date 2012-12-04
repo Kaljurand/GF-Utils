@@ -16,9 +16,9 @@ Some scripts require `gf` on the PATH.
 Some scripts require a running GF Cloud Service (http://cloud.grammaticalframework.org/).
 To start it on localhost, execute (bash):
 
-	GF_RESTRICTED=yes gf -server
+	$ GF_RESTRICTED=yes gf --server --document-root document-root
 
-(Required GF version 2012-11-06 or later.)
+(Required GF version 2012-11-14 or newer.)
 
 
 Documentation
@@ -64,7 +64,19 @@ Parsing:
 	echo "hello" | python pgf.py --dir /tmp/dir -g Phrasebook -f PhrasebookEng
 
 
-# Other
+### Generating GF-grammars
+
+Interpret the given CSV file as a GF grammar and write it out into a
+set of GF files.
+
+	python csv_to_grammar.py --file Sheet1.csv --name Geograpy --dir outdir
+
+An example of an input file is
+<https://docs.google.com/spreadsheet/ccc?key=0Aprlzd4hAZrEdGVmYnBwZWdyVkUwQ0RBZE5BSXB1OEE>
+(downloaded as csv).
+
+
+### Other
 
 List the all the modules that are imported starting from 3 Phrasebook toplevel files,
 either directly or indirectly.
