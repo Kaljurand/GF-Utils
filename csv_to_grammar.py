@@ -64,6 +64,22 @@ def make_fun_name(word, cat):
 	"""
 	return re.sub(r'[^A-Za-z0-9]', '_', word) + "_" + cat
 
+def make_lin(lin, cat):
+	"""
+	If the lin cell contains a bare string, i.e. no operator call,
+	then create a call to one-argument smart paradigm.
+	"""
+	if lin.find('"') > 0:
+		return lin
+	if lin == "":
+		lin = "TODO"
+	if cat == "CN":
+		return 'mkCN (mkN "{0}")'.format(lin)
+	elif cat == "V2":
+		return 'mkV2 (mkV "{0}")'.format(lin)
+	else:
+		return 'mk{0} "{1}"'.format(cat, lin)
+
 
 # Commandline arguments parsing
 parser = argparse.ArgumentParser(description='Generates 2 GF modules for a given language')
@@ -103,13 +119,14 @@ with open(args.csv_file, 'rb') as csvfile:
 	header = next(reader)
 	module_header = next(reader)
 	for row in reader:
-		funname = make_fun_name(row[0], row[1])
-		funs[funname] = row[1]
+		cat = row[1]
+		funname = make_fun_name(row[0], cat)
+		funs[funname] = cat
 		i = first_lang_col
-		for lang in row[first_lang_col:]:
+		for lin in row[first_lang_col:]:
 			if i not in lins:
 				lins[i] = {}
-			lins[i][funname] = lang
+			lins[i][funname] = make_lin(lin, cat)
 			i = i + 1
 		print >> sys.stderr, 'Reading: ' + '  |  '.join(row)
 
