@@ -66,10 +66,11 @@ def make_fun_name(word, cat):
 
 def make_lin(lin, cat):
 	"""
-	If the lin cell contains a bare string, i.e. no operator call,
+	If the lin cell contains a bare string,
+	i.e. no operator call (e.g. mkN "dog", L.dog_N),
 	then create a call to one-argument smart paradigm.
 	"""
-	if lin.find('"') > 0:
+	if re.search(r'[".()]', lin):
 		return lin
 	if lin == "":
 		lin = "TODO"
