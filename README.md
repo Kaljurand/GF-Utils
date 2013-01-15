@@ -42,6 +42,10 @@ Upload the MOLTO Phrasebook:
 
 	python upload-grammar.py --dir /tmp/dir ${GF_SRC}/examples/phrasebook/
 
+Upload a directory full of PGF files:
+
+	python upload-grammar.py --dir /tmp/dir --ext "\.pgf" local_pgf_dir/
+
 Compile it for English and German using `Phrase` as start category.
 The start category is optional, if specified then optimized compilation is used.
 

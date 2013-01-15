@@ -19,11 +19,6 @@ import subprocess
 import re
 
 curl='curl'
-# We want to upload only gf files.
-ext_pattern='^\.gf$'
-# In some cases precompiled gfo-files would also make sense,
-# i.e. TODO: make ext_pattern part of the commandline.
-#ext_pattern='^\.(gf|gfo)$'
 
 def gf_file_generator(src_dirs, includes):
 	"""
@@ -35,7 +30,7 @@ def gf_file_generator(src_dirs, includes):
 			for name in files:
 				path = os.path.join(root, name)
 				basename, extension = os.path.splitext(path)
-				if re.match(ext_pattern, extension):
+				if re.match(args.ext_pattern, extension):
 					if includes is None:
 						yield [root, name]
 					elif name in includes:
@@ -67,6 +62,12 @@ parser = argparse.ArgumentParser(description='Uploads GF files to the GF cloud')
 
 parser.add_argument('src_dirs', metavar='SRC', type=str, nargs='+',
 	help='local directories to be copied to the server')
+
+# Usually we want to upload only gf-files: ^\.gf$
+# In some cases precompiled gfo-files would also make sense: ^\.(gf|gfo)$
+parser.add_argument('-e', '--ext', type=str, action='store', dest='ext_pattern',
+	default='^\.gf$',
+	help='extension of the uploaded files (regular expression), default = ^\.gf$')
 
 parser.add_argument('--includes', type=str, action='store', dest='includes',
 	help='every uploaded file must be in this list (if specified) by its local name')
