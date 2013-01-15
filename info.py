@@ -26,7 +26,7 @@ def get_grammars(query):
 	try:
 		return json.loads(urllib2.urlopen(urllib2.Request(query)).read())
 	except:
-		print >> sys.stderr, "ERROR: Failed to get grammars, is the GF server running?"
+		print >> sys.stderr, 'ERROR: Failed to get grammars using query {0}'.format(query)
 		sys.exit()
 
 
