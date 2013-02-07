@@ -20,7 +20,7 @@
 # The language names must be provided in the first row.
 
 # Author: Kaarel Kaljurand
-# Version: 2012-12-04
+# Version: 2013-02-07
 #
 # Examples:
 #
@@ -64,22 +64,43 @@ def make_fun_name(word, cat):
 	"""
 	return re.sub(r'[^A-Za-z0-9]', '_', word) + "_" + cat
 
-def make_lin(lin, cat):
+def make_lin(cell, cat):
 	"""
-	If the lin cell contains a bare string,
-	i.e. no operator call (e.g. mkN "dog", L.dog_N),
-	then create a call to one-argument smart paradigm.
+	If the lin cell contains a bare string (e.g. '"capital" feminine')
+	i.e. no operator call (e.g. 'mkV2 "ask"', 'mkV2 L.ask_V'),
+	then create a call to a smart paradigm.
+	The whitespace is trimmed.
+	If there are not spaces then put the string into quotes.
 	"""
-	if re.search(r'[".()]', lin):
-		return lin
-	if lin == "":
-		lin = "TODO"
+	cell = cell.strip()
+	if cell == "":
+		cell = "TODO"
+
+	# if there are no existing quotes
+	# and it is not an entry like 'mkV2 (I.contener_V)'
+	if cell.find('"') == -1 and not re.search('[A-Z]\.', cell):
+		cell = '"' + cell + '"'
+
 	if cat == "CN":
-		return 'mkCN (mkN "{0}")'.format(lin)
+		if not has_prefix_some(cell, ['mkCN', 'aceN']):
+			return 'mkCN (mkN {0})'.format(cell)
 	elif cat == "V2":
-		return 'mkV2 (mkV "{0}")'.format(lin)
+		if not has_prefix_some(cell, ['mkV2', 'prepV2', 'aceV2']):
+			return 'mkV2 (mkV {0})'.format(cell)
 	else:
-		return 'mk{0} "{1}"'.format(cat, lin)
+		if not has_prefix_some(cell, ['mk' + cat, 'ace' + cat]):
+			return 'mk{0} {1}'.format(cat, cell)
+	return cell
+
+def has_prefix_some(s, prefix_set):
+	"""
+	True if the given string has a prefix
+	that is in the given set.
+	"""
+	for prefix in prefix_set:
+		if s.find(prefix, 0) != -1:
+			return True
+	return False
 
 
 # Commandline arguments parsing
