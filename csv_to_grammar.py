@@ -64,6 +64,11 @@ def make_fun_name(word, cat):
 	"""
 	return re.sub(r'[^A-Za-z0-9]', '_', word) + "_" + cat
 
+def make_cat(cat, default_cat):
+	if cat == "":
+		return default_cat
+	return cat
+
 def make_lin(cell, cat):
 	"""
 	If the lin cell contains a bare string (e.g. '"capital" feminine')
@@ -141,7 +146,7 @@ with open(args.csv_file, 'rb') as csvfile:
 	header = next(reader)
 	module_header = next(reader)
 	for row in reader:
-		cat = row[1]
+		cat = make_cat(row[1], "PN")
 		funname = make_fun_name(row[0], cat)
 		funs[funname] = cat
 		i = first_lang_col
