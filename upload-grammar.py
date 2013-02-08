@@ -6,7 +6,7 @@
 # on the server so make sure that no filenames clash.
 
 # Author: Kaarel Kaljurand
-# Version: 2012-10-25
+# Version: 2013-02-08
 #
 # Examples:
 #
@@ -40,7 +40,8 @@ def gf_file_generator(src_dirs, includes):
 def upload_files(dir, files):
 	for [root, name] in files:
 		print '{0} {1}'.format(name, root)
-		upload(dir, root, name)
+		if not args.noact:
+			upload(dir, root, name)
 
 
 def upload(dir, root, name):
@@ -78,6 +79,11 @@ parser.add_argument('-d', '--dir', type=str, action='store', dest='dir',
 parser.add_argument('-s', '--server', type=str, action='store', dest='server',
 	default='http://localhost:41296',
 	help='name of the GF cloud service, default=http://localhost:41296')
+
+parser.add_argument('-n', '--no-act', action='store_true',
+	default=False,
+	dest='noact',
+	help='just list the files but do not upload them, default=False')
 
 parser.add_argument('-v', '--version', action='version', version='%(prog)s v0.1')
 
