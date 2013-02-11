@@ -69,17 +69,20 @@ def make_cat(cat, default_cat):
 		return default_cat
 	return cat
 
-def make_lin(cell, cat):
+def make_lin(cell, cat, col_id):
 	"""
 	If the lin cell contains a bare string (e.g. '"capital" feminine')
 	i.e. no operator call (e.g. 'mkV2 "ask"', 'mkV2 L.ask_V'),
 	then create a call to a smart paradigm.
 	The whitespace is trimmed.
 	If there are not spaces then put the string into quotes.
+	TODO: rewrite the ACE-specific code in a general way
 	"""
 	cell = cell.strip()
 	if cell == "":
 		cell = "TODO"
+
+	is_ace_col = (col_id == first_lang_col)
 
 	# if there are no existing quotes
 	# and it is not an entry like 'mkV2 (I.contener_V)'
@@ -88,12 +91,18 @@ def make_lin(cell, cat):
 
 	if cat == "CN":
 		if not has_prefix_some(cell, ['mkCN', 'aceN']):
+			if is_ace_col:
+				return 'aceN {0}'.format(cell)
 			return 'mkCN (mkN {0})'.format(cell)
 	elif cat == "V2":
 		if not has_prefix_some(cell, ['mkV2', 'prepV2', 'aceV2']):
+			if is_ace_col:
+				return 'aceV2 {0}'.format(cell)
 			return 'mkV2 (mkV {0})'.format(cell)
 	else:
 		if not has_prefix_some(cell, ['mk' + cat, 'ace' + cat]):
+			if is_ace_col:
+				return 'ace{0} {1}'.format(cat, cell)
 			return 'mk{0} {1}'.format(cat, cell)
 	return cell
 
@@ -153,7 +162,7 @@ with open(args.csv_file, 'rb') as csvfile:
 		for lin in row[first_lang_col:]:
 			if i not in lins:
 				lins[i] = {}
-			lins[i][funname] = make_lin(lin, cat)
+			lins[i][funname] = make_lin(lin, cat, i)
 			i = i + 1
 		print >> sys.stderr, 'Reading: ' + '  |  '.join(row)
 
