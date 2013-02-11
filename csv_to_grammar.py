@@ -80,7 +80,7 @@ def make_lin(cell, cat, col_id):
 	"""
 	cell = cell.strip()
 	if cell == "":
-		cell = "TODO"
+		return None
 
 	is_ace_col = (col_id == first_lang_col)
 
@@ -159,10 +159,12 @@ with open(args.csv_file, 'rb') as csvfile:
 		funname = make_fun_name(row[0], cat)
 		funs[funname] = cat
 		i = first_lang_col
-		for lin in row[first_lang_col:]:
+		for cell in row[first_lang_col:]:
 			if i not in lins:
 				lins[i] = {}
-			lins[i][funname] = make_lin(lin, cat, i)
+			lin = make_lin(cell, cat, i)
+			if lin != None:
+				lins[i][funname] = lin
 			i = i + 1
 		print >> sys.stderr, 'Reading: ' + '  |  '.join(row)
 
