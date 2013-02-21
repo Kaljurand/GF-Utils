@@ -27,11 +27,13 @@
 # ./csv_to_grammar.py --file Sheet1.csv --name Geograpy --dir outdir
 #
 # TODO:
+#  - convert function names to Latin1
+#  - detect and warn about duplicate function names
 #  - cleanup (especially string building)
 #  - allow simple string instead of "lin operation" and fill in the lin operation
 #    automatically, this would allow us to use Google Drive's translation function
 #    =GoogleTranslate(A3, "en", "it")
-#  - get the input directly from Google Drive (using API)
+#  - add: --url <url of CSV-formatted data>
 #
 import sys
 import argparse
@@ -62,12 +64,25 @@ def make_fun_name(word, cat):
 	"""
 	TODO: better regexp for generating legal GF fun names
 	"""
+	word = strip_cell(word)
+	if word == "":
+		raise Exception("empty function name")
 	return re.sub(r'[^A-Za-z0-9]', '_', word) + "_" + cat
 
 def make_cat(cat, default_cat):
+	cat = strip_cell(cat)
 	if cat == "":
 		return default_cat
 	return cat
+
+def strip_cell(cell):
+	"""
+	Remove [comment text], normalize whitespace, remove padding space
+	"""
+	cell = re.sub(r'\[[^]]*\]', '', cell)
+	cell = re.sub(r'\s+', ' ', cell)
+	cell = cell.strip()
+	return cell
 
 def make_lin(cell, cat, col_id):
 	"""
@@ -78,7 +93,7 @@ def make_lin(cell, cat, col_id):
 	If there are not spaces then put the string into quotes.
 	TODO: rewrite the ACE-specific code in a general way
 	"""
-	cell = cell.strip()
+	cell = strip_cell(cell)
 	if cell == "":
 		return None
 
@@ -155,18 +170,23 @@ with open(args.csv_file, 'rb') as csvfile:
 	header = next(reader)
 	module_header = next(reader)
 	for row in reader:
-		cat = make_cat(row[1], "PN")
-		funname = make_fun_name(row[0], cat)
-		funs[funname] = cat
-		i = first_lang_col
-		for cell in row[first_lang_col:]:
-			if i not in lins:
-				lins[i] = {}
-			lin = make_lin(cell, cat, i)
-			if lin != None:
-				lins[i][funname] = lin
-			i = i + 1
-		print >> sys.stderr, 'Reading: ' + '  |  '.join(row)
+		try:
+			if len(row) < 2:
+				raise Exception("less than 2 fields")
+			cat = make_cat(row[1], "PN")
+			funname = make_fun_name(row[0], cat)
+			funs[funname] = cat
+			i = first_lang_col
+			for cell in row[first_lang_col:]:
+				if i not in lins:
+					lins[i] = {}
+				lin = make_lin(cell, cat, i)
+				if lin != None:
+					lins[i][funname] = lin
+				i = i + 1
+			print >> sys.stderr, 'Reading: ' + '  |  '.join(row)
+		except Exception as e:
+			print >> sys.stderr, 'Syntax error: {:}: {:}'.format(e.message, '  |  '.join(row))
 
 # Put the abstract syntax into a string
 abstract = "--# -path=.:present\n"
