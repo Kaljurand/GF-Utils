@@ -12,27 +12,23 @@
 # Columns:
 #  1. English word (lemma form), should be reasonably long and unambiguous
 #  2. GF (RGL) category
-#  3. lin operation in language 1
-#  4. lin operation in language 2
+#  3. lin operation or simple string in language 1
+#  4. lin operation or simple string in language 2
 #  ...
 #
 # The grammar name is the name of the input file.
 # The language names must be provided in the first row.
 
 # Author: Kaarel Kaljurand
-# Version: 2013-02-07
+# Version: 2013-02-22
 #
 # Examples:
 #
 # ./csv_to_grammar.py --file Sheet1.csv --name Geograpy --dir outdir
 #
 # TODO:
-#  - convert function names to Latin1
-#  - detect and warn about duplicate function names
+#  - use underscores in ACE entries
 #  - cleanup (especially string building)
-#  - allow simple string instead of "lin operation" and fill in the lin operation
-#    automatically, this would allow us to use Google Drive's translation function
-#    =GoogleTranslate(A3, "en", "it")
 #  - add: --url <url of CSV-formatted data>
 #
 import sys
@@ -42,6 +38,8 @@ import re
 import csv
 from string import Template
 
+#path_directive = "--# -path=.:present\n"
+path_directive = ""
 
 def write_file(dir, filename, content):
 	"""
@@ -61,13 +59,11 @@ def make_grammar_name(filename):
 	return re.sub(r'[^A-Za-z0-9]', '_', noext)
 
 def make_fun_name(word, cat):
-	"""
-	TODO: better regexp for generating legal GF fun names
-	"""
 	word = strip_cell(word)
 	if word == "":
 		raise Exception("empty function name")
-	return re.sub(r'[^A-Za-z0-9]', '_', word) + "_" + cat
+	word = unicode_to_gfcode(word)
+	return word + "_" + cat
 
 def make_cat(cat, default_cat):
 	cat = strip_cell(cat)
@@ -131,6 +127,20 @@ def has_prefix_some(s, prefix_set):
 			return True
 	return False
 
+def unicode_to_gfcode(u):
+	"""
+	"""
+	u1 = u.decode("utf8")
+	u2 = u1.encode('ascii', 'xmlcharrefreplace')
+	u3 = re.sub(r'[^A-Za-z0-9\']', '_', u2)
+	return u3
+
+def make_name2(u):
+	"""
+	Remove all whitespace and lowercase the result.
+	"""
+	return re.sub(r'\s+', '', u).lower()
+
 
 # Commandline arguments parsing
 parser = argparse.ArgumentParser(description='Generates 2 GF modules for a given language')
@@ -157,6 +167,7 @@ if args.name is None:
 	args.name = make_grammar_name(args.csv_file)
 
 funs = {}
+funs2 = {}
 lins = {}
 header = []
 first_lang_col = 2
@@ -175,7 +186,13 @@ with open(args.csv_file, 'rb') as csvfile:
 				raise Exception("less than 2 fields")
 			cat = make_cat(row[1], "PN")
 			funname = make_fun_name(row[0], cat)
+			funname2 = make_name2(funname)
+			if funname in funs:
+				raise Exception("duplicate function name: '" + funname + "'")
+			if funname2 in funs2:
+				raise Exception("similar function name: '" + funname + "'")
 			funs[funname] = cat
+			funs2[funname2] = cat
 			i = first_lang_col
 			for cell in row[first_lang_col:]:
 				if i not in lins:
@@ -186,10 +203,10 @@ with open(args.csv_file, 'rb') as csvfile:
 				i = i + 1
 			print >> sys.stderr, 'Reading: ' + '  |  '.join(row)
 		except Exception as e:
-			print >> sys.stderr, 'Syntax error: {:}: {:}'.format(e.message, '  |  '.join(row))
+			print >> sys.stderr, 'Error: {:}: {:}'.format(e.message, '  |  '.join(row))
 
 # Put the abstract syntax into a string
-abstract = "--# -path=.:present\n"
+abstract = path_directive
 abstract += Template(module_header[1]).substitute(name = args.name) + " {\nfun\n"
 for funname in sorted(funs, key=str.lower):
 	abstract = abstract + funname + " : " + funs[funname] + " ;\n"
@@ -200,12 +217,17 @@ write_file(args.dir, args.name + ".gf", abstract)
 
 # Put each concrete syntax into a string
 for l in lins:
-	lang_name = header[l]
-	concrete = "--# -path=.:present\n"
-	concrete += Template(module_header[l]).substitute(name = args.name, lang = lang_name) + " {\n"
-	concrete += "flags coding=utf8 ;\nlin\n"
-	for funname in sorted(lins[l], key=str.lower):
-		concrete = concrete + funname + " = " + lins[l][funname] + " ;\n"
-	concrete = concrete + "}"
-	# ... and write it into a file.
-	write_file(args.dir, args.name + lang_name + ".gf", concrete)
+	try:
+		lang_name = strip_cell(header[l])
+		if lang_name == "":
+			raise Exception("bad language name: '" + header[l] + "'")
+		concrete = path_directive
+		concrete += Template(module_header[l]).substitute(name = args.name, lang = lang_name) + " {\n"
+		concrete += "flags coding=utf8 ;\nlin\n"
+		for funname in sorted(lins[l], key=str.lower):
+			concrete = concrete + funname + " = " + lins[l][funname] + " ;\n"
+		concrete = concrete + "}"
+		# ... and write it into a file.
+		write_file(args.dir, args.name + lang_name + ".gf", concrete)
+	except Exception as e:
+		print >> sys.stderr, 'Error: {:}'.format(e.message)
