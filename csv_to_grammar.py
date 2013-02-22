@@ -80,7 +80,7 @@ def strip_cell(cell):
 	cell = cell.strip()
 	return cell
 
-def make_lin(cell, cat, col_id):
+def make_lin(cell, cat, col_id, cell0):
 	"""
 	If the lin cell contains a bare string (e.g. '"capital" feminine')
 	i.e. no operator call (e.g. 'mkV2 "ask"', 'mkV2 L.ask_V'),
@@ -89,11 +89,19 @@ def make_lin(cell, cat, col_id):
 	If there are not spaces then put the string into quotes.
 	TODO: rewrite the ACE-specific code in a general way
 	"""
-	cell = strip_cell(cell)
-	if cell == "":
-		return None
-
 	is_ace_col = (col_id == first_lang_col)
+
+	cell = strip_cell(cell)
+
+	# If the cell is empty then we return None,
+	# unless we are in a the ACE-column in which case
+	# we'll try to use the function name as the ACE entry.
+	if cell == "":
+		if is_ace_col and cell0 != "":
+			cell = cell0
+		else:
+			return None
+
 
 	# if there are no existing quotes
 	# and it is not an entry like 'mkV2 (I.contener_V)'
@@ -197,7 +205,7 @@ with open(args.csv_file, 'rb') as csvfile:
 			for cell in row[first_lang_col:]:
 				if i not in lins:
 					lins[i] = {}
-				lin = make_lin(cell, cat, i)
+				lin = make_lin(cell, cat, i, strip_cell(row[0]))
 				if lin != None:
 					lins[i][funname] = lin
 				i = i + 1
