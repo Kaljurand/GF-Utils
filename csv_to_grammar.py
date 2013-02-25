@@ -111,17 +111,17 @@ def make_lin(cell, cat, col_id, cell0):
 	if cat == "CN":
 		if not has_prefix_some(cell, ['mkCN', 'aceN']):
 			if is_ace_col:
-				return 'aceN {0}'.format(cell)
+				return 'aceN {0}'.format(make_ace_entry(cell))
 			return 'mkCN (mkN {0})'.format(cell)
 	elif cat == "V2":
 		if not has_prefix_some(cell, ['mkV2', 'prepV2', 'aceV2']):
 			if is_ace_col:
-				return 'aceV2 {0}'.format(cell)
+				return 'aceV2 {0}'.format(make_ace_entry(cell))
 			return 'mkV2 (mkV {0})'.format(cell)
 	else:
 		if not has_prefix_some(cell, ['mk' + cat, 'ace' + cat]):
 			if is_ace_col:
-				return 'ace{0} {1}'.format(cat, cell)
+				return 'ace{0} {1}'.format(cat, make_ace_entry(cell))
 			return 'mk{0} {1}'.format(cat, cell)
 	return cell
 
@@ -134,6 +134,14 @@ def has_prefix_some(s, prefix_set):
 		if s.find(prefix, 0) != -1:
 			return True
 	return False
+
+def make_ace_entry(ace_entry_with_spaces):
+	"""
+	Assumes that the input is a sequence of quoted strings.
+	Replaces spaces inside strings with underscores.
+	"""
+	str1 = re.sub(r' ', '_', ace_entry_with_spaces)
+	return re.sub(r'"_"', '" "', str1)
 
 def unicode_to_gfcode(u):
 	"""
