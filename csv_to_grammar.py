@@ -141,7 +141,8 @@ def make_ace_entry(ace_entry_with_spaces):
 	Replaces spaces inside strings with underscores.
 	"""
 	str1 = re.sub(r' ', '_', ace_entry_with_spaces)
-	return re.sub(r'"_"', '" "', str1)
+	str2 = re.sub(r'_"', ' "', str1)
+	return re.sub(r'"_', '" ', str2)
 
 def unicode_to_gfcode(u):
 	"""

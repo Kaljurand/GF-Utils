@@ -23,6 +23,7 @@ function convertSheetToCsv_(id) {
       for (var col = 0; col < data[row].length; col++) {
         var cell = data[row][col].toString();
         cell = cell.replace(/"/g, '""');
+        cell = cell.replace(/\n/g, ' ');
         if (cell.indexOf(settings.sep) != -1 || cell.indexOf('"') != -1) {
           cell = '"' + cell + '"';
         }
