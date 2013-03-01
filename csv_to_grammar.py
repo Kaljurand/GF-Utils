@@ -20,15 +20,14 @@
 # The language names must be provided in the first row.
 
 # Author: Kaarel Kaljurand
-# Version: 2013-02-22
+# Version: 2013-03-01
 #
 # Examples:
 #
 # ./csv_to_grammar.py --file Sheet1.csv --name Geograpy --dir outdir
 #
 # TODO:
-#  - use underscores in ACE entries
-#  - cleanup (especially string building)
+#  - catch some errors, e.g. wrong parentheses structure
 #  - add: --url <url of CSV-formatted data>
 #
 import sys
@@ -108,20 +107,22 @@ def make_lin(cell, cat, col_id, cell0):
 	if cell.find('"') == -1 and not re.search('[A-Z]\.', cell):
 		cell = '"' + cell + '"'
 
+	cell = underscore_strings(cell)
+
 	if cat == "CN":
 		if not has_prefix_some(cell, ['mkCN', 'aceN']):
 			if is_ace_col:
-				return 'aceN {0}'.format(make_ace_entry(cell))
+				return 'aceN {0}'.format(cell)
 			return 'mkCN (mkN {0})'.format(cell)
 	elif cat == "V2":
 		if not has_prefix_some(cell, ['mkV2', 'prepV2', 'aceV2']):
 			if is_ace_col:
-				return 'aceV2 {0}'.format(make_ace_entry(cell))
+				return 'aceV2 {0}'.format(cell)
 			return 'mkV2 (mkV {0})'.format(cell)
 	else:
 		if not has_prefix_some(cell, ['mk' + cat, 'ace' + cat]):
 			if is_ace_col:
-				return 'ace{0} {1}'.format(cat, make_ace_entry(cell))
+				return 'ace{0} {1}'.format(cat, cell)
 			return 'mk{0} {1}'.format(cat, cell)
 	return cell
 
@@ -135,14 +136,24 @@ def has_prefix_some(s, prefix_set):
 			return True
 	return False
 
-def make_ace_entry(ace_entry_with_spaces):
+
+def underscore_strings(entry):
 	"""
-	Assumes that the input is a sequence of quoted strings.
+	Assumes that the input contains a sequence of quoted strings.
 	Replaces spaces inside strings with underscores.
 	"""
-	str1 = re.sub(r' ', '_', ace_entry_with_spaces)
-	str2 = re.sub(r'_"', ' "', str1)
-	return re.sub(r'"_', '" ', str2)
+	chars = ""
+	in_string = False
+	for ch in entry:
+		if ch == '"':
+			in_string = not in_string
+		elif ch == ' ' and in_string:
+			ch = '_'
+		chars += ch
+	if in_string:
+		raise Exception("unfinished string")
+	return chars
+
 
 def unicode_to_gfcode(u):
 	"""
