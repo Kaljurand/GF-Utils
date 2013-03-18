@@ -40,6 +40,11 @@ from string import Template
 #path_directive = "--# -path=.:present\n"
 path_directive = ""
 
+first_lang_col = 3
+fun_col = 0
+cat_col = 1
+tags_col = 2
+
 def write_file(dir, filename, content):
 	"""
 	"""
@@ -170,6 +175,13 @@ def make_name2(u):
 	return re.sub(r'\s+', '', u).lower()
 
 
+def tags(string):
+	"""
+	Convert comma-separated strings to a set of strings
+	"""
+	return set([x.strip() for x in string.split(',')])
+
+
 # Commandline arguments parsing
 parser = argparse.ArgumentParser(description='Generates 2 GF modules for a given language')
 
@@ -178,6 +190,10 @@ parser.add_argument('-f', '--file', type=str, action='store', dest='csv_file',
 
 parser.add_argument('-n', '--name', type=str, action='store', dest='name',
                    help='name of the grammar, e.g. Phrasebook (OBLIGATORY)')
+
+parser.add_argument('--exclude', type=tags, action='store', dest='exclude_tags',
+                   default=set([]),
+                   help='exclude each row tagged with one of these (comma-separated) tags')
 
 parser.add_argument('-d', '--dir', type=str, action='store', dest='dir',
                    default='.',
@@ -194,11 +210,11 @@ if args.csv_file is None:
 if args.name is None:
 	args.name = make_grammar_name(args.csv_file)
 
+
 funs = {}
 funs2 = {}
 lins = {}
 header = []
-first_lang_col = 2
 with open(args.csv_file, 'rb') as csvfile:
 	#dialect = csv.Sniffer().sniff(csvfile.read(1024))
 	#csvfile.seek(0)
@@ -210,10 +226,14 @@ with open(args.csv_file, 'rb') as csvfile:
 	module_header = next(reader)
 	for row in reader:
 		try:
-			if len(row) < 2:
-				raise Exception("less than 2 fields")
-			cat = make_cat(row[1], "PN")
-			funname = make_fun_name(row[0], cat)
+			if len(row) <= first_lang_col:
+				raise Exception("there should be at least " + first_lang_col + " fields")
+			tagset = tags(row[tags_col])
+			intersection = tagset.intersection(args.exclude_tags)
+			if len(intersection) > 0:
+				raise Exception("ignoring row based on tags " + str(intersection))
+			cat = make_cat(row[cat_col], "PN")
+			funname = make_fun_name(row[fun_col], cat)
 			funname2 = make_name2(funname)
 			if funname in funs:
 				raise Exception("duplicate function name: '" + funname + "'")
@@ -225,7 +245,7 @@ with open(args.csv_file, 'rb') as csvfile:
 			for cell in row[first_lang_col:]:
 				if i not in lins:
 					lins[i] = {}
-				lin = make_lin(cell, cat, i, strip_cell(row[0]))
+				lin = make_lin(cell, cat, i, strip_cell(row[fun_col]))
 				if lin != None:
 					lins[i][funname] = lin
 				i = i + 1
