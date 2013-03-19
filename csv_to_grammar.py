@@ -119,7 +119,7 @@ def make_lin(cell, cat, col_id, cell0):
 			if is_ace_col:
 				return 'aceN {0}'.format(cell)
 			return 'mkCN (mkN {0})'.format(cell)
-	elif cat == "V2":
+	elif cat == "V2" or cat == "V2by":
 		if not has_prefix_some(cell, ['mkV2', 'prepV2', 'aceV2']):
 			if is_ace_col:
 				return 'aceV2 {0}'.format(cell)
