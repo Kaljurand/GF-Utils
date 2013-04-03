@@ -44,6 +44,8 @@ def download_and_save(f, out):
 		lineAsArg = urllib.urlencode({ 'file' : f })
 		req = urllib2.Request(query_dl + "&" + lineAsArg)
 		content = urllib2.urlopen(req).read()
+		if not os.path.exists(out):
+			os.makedirs(out)
 		path = os.path.join(out, f)
 		output = open(path, "w")
 		output.write(content)
