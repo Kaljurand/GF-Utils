@@ -16,7 +16,7 @@ Some scripts require `gf` on the PATH.
 Some scripts require a running GF Cloud Service (http://cloud.grammaticalframework.org/).
 To start it on localhost, execute (bash):
 
-	$ GF_RESTRICTED=yes gf --server --document-root document-root
+	$ GF_RESTRICTED=yes gf --server=41297 --document-root `pwd`/document-root
 
 (Required GF version 2012-11-14 or newer.)
 
@@ -88,3 +88,8 @@ either directly or indirectly.
 	reachable-modules.py ${GF_SRC}/examples/phrasebook/Phrasebook{Eng,Ger,Ita}.gf
 
 	reachable-modules.py --path ../../grammars/acewiki_aceowl:../../lib/src/ace:../../lib/src/api Geography{Ace,Ape,Ger,Spa}.gf
+
+
+Generate trees and test how much they cover the functions defined in the grammar.
+
+	generate.py --depth 6 --number 20 --repeat 10 --cat S --probs funs.probs -g App.pgf
