@@ -93,3 +93,19 @@ either directly or indirectly.
 Generate trees and test how much they cover the functions defined in the grammar.
 
 	generate.py --depth 6 --number 20 --repeat 10 --cat S --probs funs.probs -g App.pgf
+
+
+List the 10 least used non-lexical functions in the given tree set:
+
+	cat lin.txt | grep "TestAttempto: " | sed "s/.*: //" |\
+	python coverage.py -g Simple.pgf |\
+	grep "^c" | sort -n -k3 | cut -f2,3 | head -5
+
+	Trees: 73
+	Simple functions: 37
+	Complex function coverage: 62/98
+	a2VP	0
+	a2VPQ	0
+	andRS	0
+	consText	0
+	ConsVPS	0
