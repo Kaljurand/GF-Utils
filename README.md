@@ -90,7 +90,7 @@ either directly or indirectly.
 	reachable-modules.py --path ../../grammars/acewiki_aceowl:../../lib/src/ace:../../lib/src/api Geography{Ace,Ape,Ger,Spa}.gf
 
 
-Generate trees and test how much they cover the functions defined in the grammar.
+Generate trees by GF's `generate_random`.
 
 	generate.py --depth 6 --number 20 --repeat 10 --cat S --probs funs.probs -g App.pgf
 

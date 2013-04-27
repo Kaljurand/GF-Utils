@@ -36,6 +36,10 @@ def register_tree(tree):
 	"""
 	Registers the names of the functions that make up the given tree
 	"""
+	if tree in trees:
+		trees[tree] = trees[tree] + 1
+	else:
+		trees[tree] = 1
 	funs = get_funs(tree)
 	#print >> sys.stderr, 'Funs: {0}'.format(funs)
 	for fun in funs:
@@ -66,6 +70,7 @@ cmd_gf_pg_funs = template_gf_pg_funs.substitute()
 
 out_gf_pg_funs = exec_cmd(cmd_shell, cmd_gf_pg_funs)
 
+trees = {}
 funs_simple = {}
 funs_complex = dict( (name,0)
 	for name,typ in (line.split(' : ')
@@ -75,12 +80,14 @@ funs_complex = dict( (name,0)
 count_trees = 0
 for line in sys.stdin:
 	tree = line.strip()
-	register_tree(tree)
-	count_trees = count_trees + 1
+	if tree is not '':
+		register_tree(tree)
+		count_trees = count_trees + 1
 
 
 count = sum(1 for fun in funs_complex if funs_complex[fun] > 0)
 print >> sys.stderr, 'Trees: {0}'.format(count_trees)
+print >> sys.stderr, 'Unique trees: {0}'.format(len(trees))
 print >> sys.stderr, 'Simple functions: {0}'.format(len(funs_simple))
 print >> sys.stderr, 'Complex function coverage: {0}/{1}'.format(count, len(funs_complex))
 
