@@ -1,17 +1,16 @@
 #! /usr/bin/env python
 #
-# Generates trees using the GF commandline client's "generate_random" command.
+# Expects partial trees in STDIN.
+# Completes these using the GF commandline client's "generate_random" command.
 #
 # Author: Kaarel Kaljurand
-# Version: 2013-04-27
+# Version: 2013-04-28
 #
 # TODO:
 #  - support -lang
 #  - large values of 'depth' give stack overflow, handle this somehow
 #  - what is the GF default value for 'depth'?
 #  - implement iterative deepening
-#  - support partial trees as input
-#  - don't require the -cat argument to be specified
 #
 import sys
 import argparse
@@ -22,9 +21,7 @@ from string import Template
 
 gf='gf'
 
-template_gf_gr = Template("""
-gr -cat=${cat} -number=${number} -depth=${depth} -probs=${probs}
-""")
+template_gf_gr = Template("""gr -number=${number} -depth=${depth} -probs=${probs}""")
 
 def exec_cmd(cmd_shell, cmd_gf):
 	"""
@@ -47,7 +44,7 @@ parser.add_argument('--name', type=str, action='store',
 
 parser.add_argument('-c', '--cat', type=str, action='store',
 	dest='cat',
-	help='start category (REQUIRED)')
+	help='start category')
 
 parser.add_argument('-d', '--depth', type=int, action='store',
 	default=5,
@@ -81,10 +78,6 @@ if args.grammar is None:
 	print >> sys.stderr, 'ERROR: argument -g/--grammar is not specified'
 	exit()
 
-if args.cat is None:
-	print >> sys.stderr, 'ERROR: argument -c/--cat is not specified'
-	exit()
-
 # If the name of the grammar is not given then guess it from the name of the PGF
 if args.name is None:
 	rawname = re.sub("^.*/", "", args.grammar)
@@ -93,19 +86,28 @@ if args.name is None:
 re_abstract_line = re.compile(args.name + ': (.+)')
 
 cmd_gf_gr = template_gf_gr.substitute(
-	cat = args.cat,
 	depth = args.depth,
 	number = args.number,
 	probs = args.probs
 )
 
+if args.cat is not None:
+	cmd_gf_gr = cmd_gf_gr + " " + "-cat=" + args.cat
 
 cmd_shell = [gf, '--run', '--verbose=0', args.grammar]
 
 #print >> sys.stderr, cmd_gf_gr
 #print >> sys.stderr, ' '.join(cmd_shell)
 
-for i in range(1, args.repeat + 1):
-	print >> sys.stderr, '{0}/{1}'.format(i, args.repeat)
-	# TODO: run with timeout
-	print exec_cmd(cmd_shell, cmd_gf_gr)
+count_input_tree = 0
+
+for line in sys.stdin:
+	tree = line.strip()
+	if tree is '':
+		continue
+	count_input_tree = count_input_tree + 1
+	for i in range(1, args.repeat + 1):
+		print >> sys.stderr, '{0}/({1}/{2})/{3}'.format(count_input_tree, i, args.repeat, tree)
+		cmd = cmd_gf_gr + " " + tree
+		# TODO: run with timeout
+		print exec_cmd(cmd_shell, cmd)

@@ -16,9 +16,9 @@ gf='gf'
 
 re_var = re.compile('^\?[0-9]*')
 
-template_gf_pg_funs = Template("""
-pg -funs
-""")
+template_gf_pg_funs = Template("""pg -funs""")
+
+count_funs = 0
 
 def exec_cmd(cmd_shell, cmd_gf):
 	"""
@@ -40,15 +40,20 @@ def add_item(itemset, item):
 	"""
 	if item in itemset:
 		itemset[item] = itemset[item] + 1
-	else:
-		itemset[item] = 1
+		return False
+	itemset[item] = 1
+	return True
 
 def register_tree(tree):
 	"""
 	Registers the names of the functions that make up the given tree
 	"""
-	add_item(trees, tree)
+	global count_funs
 	funs = get_funs(tree)
+	# Count the funs only in unique trees
+	is_new_tree = add_item(trees, tree)
+	if is_new_tree:
+		count_funs = count_funs + len(funs)
 	#print >> sys.stderr, 'Funs: {0}'.format(funs)
 	for fun in funs:
 		if re_var.match(fun):
@@ -89,15 +94,17 @@ funs_complex = dict( (name,0)
 count_trees = 0
 for line in sys.stdin:
 	tree = line.strip()
-	if tree is not '':
+	if not tree in ['', 'no trees found']:
 		register_tree(tree)
 		count_trees = count_trees + 1
 
+avg_funs = count_funs / len(trees)
 
 count = sum(1 for fun in funs_complex if funs_complex[fun] > 0)
 print >> sys.stderr, 'Trees: {0}'.format(count_trees)
 print >> sys.stderr, 'Unique trees: {0}'.format(len(trees))
 print >> sys.stderr, 'Partial trees: {0}'.format(len(partial_trees))
+print >> sys.stderr, 'Average tree size: {0}'.format(avg_funs)
 print >> sys.stderr, 'Simple functions: {0}'.format(len(funs_simple))
 print >> sys.stderr, 'Complex function coverage: {0}/{1}'.format(count, len(funs_complex))
 
