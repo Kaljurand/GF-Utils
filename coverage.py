@@ -3,7 +3,7 @@
 # Shows the coverage with respect to the functions defined in the grammar.
 #
 # Author: Kaarel Kaljurand
-# Version: 2013-04-26
+# Version: 2013-04-28
 #
 import sys
 import argparse
@@ -13,6 +13,8 @@ import re
 from string import Template
 
 gf='gf'
+
+re_var = re.compile('^\?[0-9]*')
 
 template_gf_pg_funs = Template("""
 pg -funs
@@ -32,24 +34,30 @@ def get_funs(tree):
 	"""
 	return filter(None, re.split('[ ()]+', tree))
 
+def add_item(itemset, item):
+	"""
+	TODO: use some built-in multiset
+	"""
+	if item in itemset:
+		itemset[item] = itemset[item] + 1
+	else:
+		itemset[item] = 1
+
 def register_tree(tree):
 	"""
 	Registers the names of the functions that make up the given tree
 	"""
-	if tree in trees:
-		trees[tree] = trees[tree] + 1
-	else:
-		trees[tree] = 1
+	add_item(trees, tree)
 	funs = get_funs(tree)
 	#print >> sys.stderr, 'Funs: {0}'.format(funs)
 	for fun in funs:
+		if re_var.match(fun):
+			add_item(partial_trees, tree)
+			continue
 		if fun in funs_complex:
 			funs_complex[fun] = funs_complex[fun] + 1
 		else:
-			if fun in funs_simple:
-				funs_simple[fun] = funs_simple[fun] + 1
-			else:
-				funs_simple[fun] = 1
+			add_item(funs_simple, fun)
 
 parser = argparse.ArgumentParser(description='Shows how many functions of the given grammar are present in the trees given in STDIN.')
 
@@ -71,6 +79,7 @@ cmd_gf_pg_funs = template_gf_pg_funs.substitute()
 out_gf_pg_funs = exec_cmd(cmd_shell, cmd_gf_pg_funs)
 
 trees = {}
+partial_trees = {}
 funs_simple = {}
 funs_complex = dict( (name,0)
 	for name,typ in (line.split(' : ')
@@ -88,6 +97,7 @@ for line in sys.stdin:
 count = sum(1 for fun in funs_complex if funs_complex[fun] > 0)
 print >> sys.stderr, 'Trees: {0}'.format(count_trees)
 print >> sys.stderr, 'Unique trees: {0}'.format(len(trees))
+print >> sys.stderr, 'Partial trees: {0}'.format(len(partial_trees))
 print >> sys.stderr, 'Simple functions: {0}'.format(len(funs_simple))
 print >> sys.stderr, 'Complex function coverage: {0}/{1}'.format(count, len(funs_complex))
 

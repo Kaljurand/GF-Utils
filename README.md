@@ -9,9 +9,11 @@ Requirements
 
 Python.
 
-Some scripts require `curl` on the PATH.
+Some scripts require one or more of the following on the PATH:
 
-Some scripts require `gf` on the PATH.
+  - `curl`
+  - `gf`
+  - `swipl`
 
 Some scripts require a running GF Cloud Service (http://cloud.grammaticalframework.org/).
 To start it on localhost, execute (bash):
@@ -109,3 +111,14 @@ List the 10 least used non-lexical functions in the given tree set:
 	andRS	0
 	consText	0
 	ConsVPS	0
+
+Bottom-up generation of tree queries. First step: convert the function definitions into a Prolog-based format.
+Second step: for each non-lexical function map it to a single tree (there can be more but the others are not generated
+by `once/1`), such that:
+
+  - the tree embeds the function,
+  - the tree corresponds to the category 'Sentence',
+  - all arguments in the tree are unspecified ('?').
+
+	echo "pg -funs" | gf --run Grammar.pgf | convert_funs.py > funs.pl
+	swipl -g "[funs], [fun_path], fun(Fun, [_|_], _), once(fun_to_tree(Fun, 'Sentence', T)), format_in_gf(T), nl, fail ; true." -t halt -f none
