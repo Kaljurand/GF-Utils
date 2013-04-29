@@ -1,16 +1,24 @@
 #! /usr/bin/env python
 #
-# Expects partial trees in STDIN.
+# Expects partial trees in STDIN (make these e.g. using fun_path.pl).
 # Completes these using the GF commandline client's "generate_random" command.
 #
+# The long term plan of this humble script is to offer all kinds of generation
+# and combinations of different types of generation:
+#  - top down
+#  - bottom up
+#  - probability-guided
+#  - exhaustive
+#  - look-ahead based
+#
 # Author: Kaarel Kaljurand
-# Version: 2013-04-28
+# Version: 2013-04-29
 #
 # TODO:
-#  - support -lang
+#  - implement proper timeout (available in Python v3.3)
 #  - large values of 'depth' give stack overflow, handle this somehow
-#  - what is the GF default value for 'depth'?
-#  - implement iterative deepening
+#  - implement iterative deepening, i.e. if "no tree found" then increase depth
+#  - don't required the probs file (the /dev/null based default is probably not portable)
 #
 import sys
 import argparse
@@ -21,7 +29,7 @@ from string import Template
 
 gf='gf'
 
-template_gf_gr = Template("""gr -number=${number} -depth=${depth} -probs=${probs}""")
+template_gf_gr = Template("""gr -lang=${lang} -number=${number} -depth=${depth} -probs=${probs}""")
 
 def exec_cmd(cmd_shell, cmd_gf):
 	"""
@@ -46,6 +54,12 @@ parser.add_argument('-c', '--cat', type=str, action='store',
 	dest='cat',
 	help='start category')
 
+# TODO: use a more universal default (e.g. 'some' or 'all' if backend supports)
+parser.add_argument('-l', '--lang', type=str, action='store',
+	default='Ace',
+	dest='lang',
+	help='uses only functions that have linearizations in all these languages')
+
 parser.add_argument('-d', '--depth', type=int, action='store',
 	default=5,
 	dest='depth',
@@ -66,9 +80,11 @@ parser.add_argument('-r', '--repeat', type=int, action='store',
 	dest='repeat',
 	help='number of times to repeat the generation')
 
-parser.add_argument('-t', '--timeout', type=int, action='store',
+#floating point number with an optional suffix:
+# `s' for seconds (the default), `m' for minutes, `h' for hours or `d' for days.
+parser.add_argument('-t', '--timeout', type=str, action='store',
 	dest='timeout',
-	help='number of seconds after which the generation should timeout (NOT IMPLEMENTED)')
+	help='number of seconds after which the generation should timeout (works only on Linux)')
 
 parser.add_argument('-v', '--version', action='version', version='%(prog)s v0.2')
 
@@ -86,6 +102,7 @@ if args.name is None:
 re_abstract_line = re.compile(args.name + ': (.+)')
 
 cmd_gf_gr = template_gf_gr.substitute(
+	lang = args.lang,
 	depth = args.depth,
 	number = args.number,
 	probs = args.probs
@@ -95,6 +112,9 @@ if args.cat is not None:
 	cmd_gf_gr = cmd_gf_gr + " " + "-cat=" + args.cat
 
 cmd_shell = [gf, '--run', '--verbose=0', args.grammar]
+
+if args.timeout is not None:
+	cmd_shell = ['timeout', args.timeout] + cmd_shell
 
 #print >> sys.stderr, cmd_gf_gr
 #print >> sys.stderr, ' '.join(cmd_shell)
@@ -109,5 +129,5 @@ for line in sys.stdin:
 	for i in range(1, args.repeat + 1):
 		print >> sys.stderr, '{0}/({1}/{2})/{3}'.format(count_input_tree, i, args.repeat, tree)
 		cmd = cmd_gf_gr + " " + tree
-		# TODO: run with timeout
+		#print >> sys.stderr, '{0}'.format(cmd)
 		print exec_cmd(cmd_shell, cmd)

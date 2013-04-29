@@ -65,7 +65,7 @@ path_to_tree_aux([Fun-Index | Tail], Bottom, t(Fun, Args1)) :-
 
 %% format_in_gf(+Tree) is det.
 %
-% Serializes the given Tree in the GF tree format, e.g.
+% Serializes the given Tree in the GF tree format, i.e.
 %
 % t(Name, Args) -> (Name Args) with variables replaced by ?
 %
@@ -89,4 +89,4 @@ format_in_gf(t(Name, Args)) :-
 % Lists functions to be ignored
 % TODO: make this configurable
 %
-bad_fun(for_everyS).
+bad_fun(bad_fun).
