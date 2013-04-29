@@ -38,11 +38,39 @@ path(StartCat, StartCat, _Seen, []) :-
 % There exists Fun1 which can embed a fun of category Cat
 % at argument position Index
 path(Cat, StartCat, Seen, [Fun1-Index | Path]) :-
-	consumer(Cat, Fun1, Index),
-	\+ bad_fun(Fun1),
-	\+ member(Fun1, Seen), % path must contain unique funs
+	select_fun(Cat, Seen, Fun1, Index),
 	fun(Fun1, _Args, Cat1),
 	path(Cat1, StartCat, [Fun1 | Seen], Path).
+
+
+%% select_fun(Cat, Seen, Fun, Index) is nondet
+%
+% Select a function that consumes the given category.
+% Preference is given to functions which consume the
+% category at a low argument position. In case of several
+% functions that match, choose one randomly.
+%
+% TODO: current version prefers low indexes,
+% rather: prefer low number of arguments
+%
+% TODO: magic number 4
+%
+select_fun(Cat, Seen, Fun, Index) :-
+	between(0, 4, Index),
+	findall(F, good_consumer(Cat, Seen, F, Index), Funs),
+	random_permutation(Funs, FunsInRandomOrder),
+	member(Fun, FunsInRandomOrder).
+
+/*
+select_fun(Cat, Seen, Fun, Index) :-
+	good_consumer(Cat, Seen, Fun, Index).
+*/
+
+% path must contain unique funs
+good_consumer(Cat, Seen, Fun, Index) :-
+	consumer(Cat, Fun, Index),
+	\+ bad_fun(Fun),
+	\+ member(Fun, Seen).
 
 
 %% path_to_tree(+Path, -Tree) is det.
@@ -90,3 +118,6 @@ format_in_gf(t(Name, Args)) :-
 % TODO: make this configurable
 %
 bad_fun(bad_fun).
+bad_fun(falseS).
+bad_fun(orRS).
+bad_fun(andRS).

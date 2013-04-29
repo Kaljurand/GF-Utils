@@ -2,7 +2,6 @@
 
 # Location of ACE-in-GF
 g=${ACE_IN_GF}/Words300.pgf
-#probs=${ACE_IN_GF}/probs/combined.probs
 probs=${ACE_IN_GF}/probs/Words300.probs
 
 # Locations of various outputs
@@ -12,9 +11,12 @@ ptrees=${out}/ptrees.txt
 trees=${out}/trees.txt
 coverage_ptrees=${out}/coverage_ptrees.txt
 coverage_trees=${out}/coverage_trees.txt
+coverage_trees_sorted=${out}/coverage_trees_sorted.txt
+coverage_ptrees_info=${out}/coverage_ptrees_info.txt
+coverage_trees_info=${out}/coverage_trees_info.txt
 lincmd=${out}/lincmd.txt
 lin=${out}/lin.txt
-lin_ace=${out}/lin_ace.txt
+lin_lang=${out}/lin_lang.txt
 
 # Generation parameters
 lang=Ace
@@ -28,7 +30,7 @@ lang=Ace
 # Some reference results specific to a specific version of ACE-in-GF.
 # Note that the coverage on partial trees is 82.
 # 2: 17/54 (avg. tree size vs coverage)
-# 3: 23/71
+# 3: 23/71 -> 17/74
 # 4: 28/77
 # 5: 36/77
 # 6: 43/79
@@ -62,14 +64,15 @@ cat ${ptrees} | generate.py --lang=${lang} --depth ${depth} --number ${number} -
 echo "Making a GF linearize-command"
 cat ${trees} | grep "(" | sed "s/^/l -treebank /" > ${lincmd}
 
-echo "Coverage of partial trees"
-cat ${ptrees} | coverage.py -g ${g} > ${coverage_ptrees}
+echo "Coverage of partial and final trees"
+cat ${ptrees} | coverage.py -g ${g} > ${coverage_ptrees} 2> ${coverage_ptrees_info}
+cat ${trees} | coverage.py -g ${g} > ${coverage_trees} 2> ${coverage_trees_info}
+cat ${coverage_ptrees_info} ${coverage_trees_info}
 
-echo "Coverage of final trees"
-cat ${trees} | coverage.py -g ${g} > ${coverage_trees}
+cat ${coverage_trees} | sort -nr -k3 > ${coverage_trees_sorted}
 
 echo "Linearizing"
 cat ${lincmd} | gf --run ${g} > ${lin}
 
 echo "Extracting ACE-linearizations"
-cat ${lin} | grep "Ace: " > ${lin_ace}
+cat ${lin} | grep "${lang}: " > ${lin_lang}

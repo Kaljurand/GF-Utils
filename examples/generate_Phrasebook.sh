@@ -11,6 +11,9 @@ ptrees=${out}/ptrees.txt
 trees=${out}/trees.txt
 coverage_ptrees=${out}/coverage_ptrees.txt
 coverage_trees=${out}/coverage_trees.txt
+coverage_trees_sorted=${out}/coverage_trees_sorted.txt
+coverage_ptrees_info=${out}/coverage_ptrees_info.txt
+coverage_trees_info=${out}/coverage_trees_info.txt
 lincmd=${out}/lincmd.txt
 lin=${out}/lin.txt
 lin_lang=${out}/lin_lang.txt
@@ -51,11 +54,12 @@ cat ${ptrees} | generate.py --lang=${lang} --depth ${depth} --number ${number} -
 echo "Making a GF linearize-command"
 cat ${trees} | grep "(" | sed "s/^/l -treebank /" > ${lincmd}
 
-echo "Coverage of partial trees"
-cat ${ptrees} | coverage.py -g ${g} > ${coverage_ptrees}
+echo "Coverage of partial and final trees"
+cat ${ptrees} | coverage.py -g ${g} > ${coverage_ptrees} 2> ${coverage_ptrees_info}
+cat ${trees} | coverage.py -g ${g} > ${coverage_trees} 2> ${coverage_trees_info}
+cat ${coverage_ptrees_info} ${coverage_trees_info}
 
-echo "Coverage of final trees"
-cat ${trees} | coverage.py -g ${g} > ${coverage_trees}
+cat ${coverage_trees} | sort -nr -k3 > ${coverage_trees_sorted}
 
 echo "Linearizing"
 cat ${lincmd} | gf --run ${g} > ${lin}
