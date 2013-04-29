@@ -1,4 +1,4 @@
-% Assumes fun/2, consumer/3
+% Assumes fun/3, consumer/3
 %
 % Example:
 %
