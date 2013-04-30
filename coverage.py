@@ -98,7 +98,7 @@ for line in sys.stdin:
 		register_tree(tree)
 		count_trees = count_trees + 1
 
-avg_funs = count_funs / len(trees)
+avg_funs = count_funs / float(len(trees))
 
 count = sum(1 for fun in funs_complex if funs_complex[fun] > 0)
 print >> sys.stderr, 'Trees: {0}'.format(count_trees)

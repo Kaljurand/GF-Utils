@@ -111,7 +111,7 @@ select_fun(Cat, Seen, Fun, Index, Key) :-
 % path must contain unique funs
 good_consumer(Cat, Seen, Fun, Index) :-
 	consumer(Cat, Fun, Index),
-	\+ bad_fun(Fun),
+	\+ bad_fun(Cat, Fun),
 	\+ member(Fun, Seen).
 
 
@@ -176,18 +176,29 @@ format_in_gf(t(Name, Args)) :-
 	format(") ", [Name]).
 
 
+is_endo(Fun) :-
+	fun(Fun, Args, Cat),
+	memberchk(Cat, Args).
+
+is_endo(Cat, Fun) :-
+	fun(Fun, Args, Cat),
+	memberchk(Cat, Args).
+
+
+%% bad_fun(?Cat, ?Fun) is nondet.
 %% bad_fun(?Fun) is nondet.
 %
-% Lists functions to be ignored
+% Lists functions to avoid on the path.
 % TODO: make this configurable
 %
-bad_fun(bad_fun).
-/*
-bad_fun(falseS).
-bad_fun(orRS).
-bad_fun(andRS).
-*/
-bad_fun(for_everyS).
+
+bad_fun(Cat, Fun) :-
+	is_endo(Cat, Fun),
+	!.
+
+bad_fun(_Cat, Fun) :-
+	bad_fun(Fun).
+
 bad_fun('ConsVPS').
 bad_fun('ConsVPSQ').
 bad_fun('BaseVPS').
