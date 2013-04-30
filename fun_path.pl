@@ -6,6 +6,25 @@
 %
 % fun(Fun, [_|_], _), once(fun_to_tree(Fun, 'Text', T)), format_in_gf(T).
 
+%% call_n_times(+N:integer, +Goal)
+call_n_times(N, Goal) :-
+	nb_setval(counter, 0),
+	call(Goal),
+	inc_counter(counter, NewValue),
+	(
+		NewValue =< N
+	->
+		true
+	;
+		!, fail
+	).
+
+inc_counter(Name, ValueNew) :-
+	nb_getval(Name, Value),
+	ValueNew is Value + 1,
+	nb_setval(Name, ValueNew).
+
+
 %% fun_to_tree(Fun, StartCat, Tree) is nondet.
 %
 %
