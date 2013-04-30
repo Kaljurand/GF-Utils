@@ -32,6 +32,7 @@ allptrees=${out}/allptrees.txt
 trees=${out}/trees.txt
 coverage_ptrees=${out}/coverage_ptrees.txt
 coverage_trees=${out}/coverage_trees.txt
+coverage_ptrees_sorted=${out}/coverage_ptrees_sorted.txt
 coverage_trees_sorted=${out}/coverage_trees_sorted.txt
 coverage_ptrees_info=${out}/coverage_ptrees_info.txt
 coverage_trees_info=${out}/coverage_trees_info.txt
@@ -46,17 +47,19 @@ mkdir -p ${out}
 
 echo "Making the list of function definitions"
 echo "pg -funs" | gf --run ${g} | convert_funs.py > ${funs}
+# To exclude 'data' run this instead:
+#echo "pg" | gf --run ${g} | grep "fun .*:.* ;" | sed "s/^ *fun //" | convert_funs.py > ${funs}
 
 
 for cat in ${cats}; do
 	echo "Generating partial trees up to category ${cat}";
-	swipl -g "['${funs}'], [fun_path], fun(Fun, [_|_], _), call_n_times(${max_ptrees}, fun_to_tree(Fun, '${cat}', T)), format_in_gf(T), nl, fail ; true." -t halt -f none > ${out}/cat_${cat}_${ptrees_suffix}
+	swipl -g "['${funs}'], [fun_path], find_filter_and_format_trees(${max_ptrees}, '${cat}')." -t halt -f none > ${out}/cat_${cat}_${ptrees_suffix}
 done
 
 cat ${out}/cat_*_${ptrees_suffix} > ${allptrees}
 
 echo "Filling in partial trees"
-cat ${allptrees} | generate.py --lang=${lang} --depth ${depth} --number ${number} --repeat ${repeat} --timeout=${timeout} --probs ${probs} -g ${g} > ${trees}
+cat ${allptrees} | generate.py --lang=${lang} --depth ${depth} --number ${number} --repeat ${repeat} --timeout=${timeout} --probs ${probs} -g ${g} | sort | uniq > ${trees}
 
 echo "Making a GF linearize-command"
 cat ${trees} | grep "(" | sed "s/^/l -bind -treebank /" > ${lincmd}
@@ -66,6 +69,7 @@ cat ${allptrees} | coverage.py -g ${g} > ${coverage_ptrees} 2> ${coverage_ptrees
 cat ${trees} | coverage.py -g ${g} > ${coverage_trees} 2> ${coverage_trees_info}
 cat ${coverage_ptrees_info} ${coverage_trees_info}
 
+cat ${coverage_ptrees} | sort -nr -k3 > ${coverage_ptrees_sorted}
 cat ${coverage_trees} | sort -nr -k3 > ${coverage_trees_sorted}
 
 echo "Linearizing"

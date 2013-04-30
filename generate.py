@@ -46,10 +46,6 @@ parser.add_argument('-g', '--grammar', type=str, action='store',
 	dest='grammar',
 	help='full path to the PGF (REQUIRED)')
 
-parser.add_argument('--name', type=str, action='store',
-	dest='name',
-	help='name of the grammar (guessed on the basis of the grammar path if missing)')
-
 parser.add_argument('-c', '--cat', type=str, action='store',
 	dest='cat',
 	help='start category')
@@ -93,13 +89,6 @@ args = parser.parse_args()
 if args.grammar is None:
 	print >> sys.stderr, 'ERROR: argument -g/--grammar is not specified'
 	exit()
-
-# If the name of the grammar is not given then guess it from the name of the PGF
-if args.name is None:
-	rawname = re.sub("^.*/", "", args.grammar)
-	args.name = re.sub("\.pgf$", "", rawname)
-
-re_abstract_line = re.compile(args.name + ': (.+)')
 
 cmd_gf_gr = template_gf_gr.substitute(
 	lang = args.lang,
