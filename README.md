@@ -7,7 +7,11 @@ Various scripts for interacting with GF tools and services
 Requirements
 ------------
 
+Various scripts have various requirements but all are listed below.
+
 Python.
+
+GHC.
 
 Some scripts require one or more of the following on the PATH:
 
@@ -82,7 +86,7 @@ An example of an input file is the output of
 	curl -L https://script.google.com/macros/s/AKfycbyMYJxM_qL7vS45r_NJJQC_4seepJk3faIkiw5zDIC3Lr9cGjE/exec
 
 
-### Other
+### Analyzing GF-grammars
 
 List the all the modules that are imported starting from 3 Phrasebook toplevel files,
 either directly or indirectly.
@@ -122,3 +126,27 @@ by `once/1`), such that:
 
 	echo "pg -funs" | gf --run Grammar.pgf | convert_funs.py > funs.pl
 	swipl -g "[funs], [fun_path], fun(Fun, [_|_], _), once(fun_to_tree(Fun, 'Sentence', T)), format_in_gf(T), nl, fail ; true." -t halt -f none
+
+#### Analyzing ambiguity
+
+Roundtripper highlights some forms of ambiguity present in the grammar by linearizing the
+given trees and then parsing the obtained linearizations.
+
+  1. compile [Roundtripper.hs](Roundtripper.hs) using `make Roundtripper`
+  2. generate some trees using the methods described above
+  3. run Roundtripper and analyze the results
+
+Here is an example that lists the most ambiguous languages in the MOLTO Phrasebook.
+
+	cat trees.txt | ./Roundtripper -f Phrasebook.pgf -l DisambPhrasebookEng > out.txt
+	cat out.txt | grep DIFF | cut -f2 | sort | uniq -c | sort -nr
+	    566 PhrasebookUrd
+	    467 PhrasebookTha
+	    427 PhrasebookHin
+	    381 PhrasebookPes
+	    360 PhrasebookEng
+	    322 PhrasebookRus
+	    249 PhrasebookSwe
+	    ...
+
+For more documentation see the source of [Roundtripper.hs](Roundtripper.hs).

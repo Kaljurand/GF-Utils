@@ -38,10 +38,11 @@ coverage_ptrees_info=${out}/coverage_ptrees_info.txt
 coverage_trees_info=${out}/coverage_trees_info.txt
 lincmd=${out}/lincmd.txt
 lin=${out}/lin.txt
-lin_lang=${out}/lin_lang.txt
 
 # Configuration file can override the defaults
 source $2
+
+lin_lang=${out}/lin_${lang}.txt
 
 mkdir -p ${out}
 
@@ -76,4 +77,4 @@ echo "Linearizing"
 cat ${lincmd} | gf --run ${g} > ${lin}
 
 echo "Extracting lang-linearizations"
-cat ${lin} | grep "${lang}: " > ${lin_lang}
+cat ${lin} | grep "${lang}: " | sed "s/.*${lang}: //" > ${lin_lang}

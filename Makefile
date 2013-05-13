@@ -1,3 +1,6 @@
+
+Roundtripper = Roundtripper
+
 all: help
 
 help:
@@ -8,4 +11,8 @@ help:
 
 
 clean:
-	rm -f _gfdepgraph.dot
+	rm -f _gfdepgraph.dot *.hi *.o
+
+
+Roundtripper: $(Roundtripper).hs
+	ghc --make -o $(Roundtripper) $(Roundtripper).hs
