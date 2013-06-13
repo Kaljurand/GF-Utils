@@ -71,7 +71,7 @@ Download the source files (i.e. files with the extension '.gf'):
 
 Parsing:
 
-	echo "hello" | pgf.py --dir /tmp/dir -g Phrasebook -f PhrasebookEng
+	echo "hello" | pgfws-client.py --dir /tmp/dir -g Phrasebook -f PhrasebookEng
 
 
 ### Generating GF-grammars
