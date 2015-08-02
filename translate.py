@@ -36,14 +36,16 @@ def get_args():
     p.add_argument('--cat', type=str, action='store', help='start category for parsing')
     p.add_argument('--n-best', type=int, action='store', dest='n_best', default=1, help='number of parses to be generated')
     p.add_argument('--tokenize', action='store_true', help='tokenize input string (only if type=plain)')
-    p.add_argument('-v', '--version', action='version', version='%(prog)s v0.1.0')
+    p.add_argument('-v', '--version', action='version', version='%(prog)s v0.2.0')
     return p.parse_args()
 
 def print_utf8(s, file=sys.stdout):
     print(s.encode('utf8'), file=file)
 
 def lowercase_first(s):
-    return s[:1].lower() + s[1:] if s else ''
+    if s == '' or s[0:4] == 'John' or s[0:4] == 'Mary':
+        return s
+    return s[:1].lower() + s[1:]
 
 def tokenize(s):
     s1 = lowercase_first(s)
